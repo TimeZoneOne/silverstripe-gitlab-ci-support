@@ -44,7 +44,7 @@ class SilverStripeGitlabCiSupport {
 	private $moduleFolder;
 	private $supportFolder;
 	private $ignoreFiles;
-	private $project = 'site';
+	private $project = 'mysite';
 	private $dryrun = false;
 
 	public function __construct($moduleFolder, $supportDir) {
@@ -62,11 +62,12 @@ class SilverStripeGitlabCiSupport {
 	public function initialize(){
 		$this->moveModuleIntoSubfolder();
 		$this->moveProjectIntoRoot();
-		$this->moveToRoot('composer.json');
+        $this->run_cmd('cp ' . $this->moduleFolder . '/composer.json .');
+        $this->moveToRoot('_ss_environment.php');
 		$this->moveToRoot('phpunit.xml');
 		$this->replaceInFile('{{MODULE_DIR}}', $this->moduleFolder, './phpunit.xml');
-		$this->run_cmd('rm ' . $this->supportFolder . ' -fr');
-		$this->addDepenanciesToComposer();
+		$this->run_cmd('rm -rf ' . $this->supportFolder);
+//		$this->addDepenanciesToComposer();
 	}
 
 	private function addDepenanciesToComposer() {
