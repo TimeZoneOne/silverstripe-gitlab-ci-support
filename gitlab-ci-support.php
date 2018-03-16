@@ -61,6 +61,9 @@ class SilverStripeGitlabCiSupport {
 
 	public function initialize(){
 		$module = $this->getModuleDetails();
+
+		print_r($module) . "\n\n";
+
 		$this->addCurrentModuleToComposer($module);
 		$this->moveModuleIntoSubfolder();
 		$this->moveProjectIntoRoot();
