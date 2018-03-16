@@ -53,7 +53,7 @@ class SilverStripeGitlabCiSupport {
 
 		$parent = basename(dirname($supportDir));
 		if ( basename(getcwd()) != $parent ) {
-			//throw new Exception("Must run script from parent directory \"$parent\".");
+			throw new Exception("Must run script from parent directory \"$parent\".");
 		}
 
 		$this->ignoreFiles = array('.', '..', '.git', $this->moduleFolder, $this->supportFolder, $this->project);
