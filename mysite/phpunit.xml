@@ -1,4 +1,4 @@
-<phpunit bootstrap="framework/tests/bootstrap.php" colors="true">
+<phpunit bootstrap="vendor/silverstripe/framework/tests/bootstrap.php" colors="true">
 
     <php>
         <get name="flush" value="1"/>

@@ -53,29 +53,69 @@ class SilverStripeGitlabCiSupport {
 
 		$parent = basename(dirname($supportDir));
 		if ( basename(getcwd()) != $parent ) {
-			throw new Exception("Must run script from parent directory \"$parent\".");
+			//throw new Exception("Must run script from parent directory \"$parent\".");
 		}
 
 		$this->ignoreFiles = array('.', '..', '.git', $this->moduleFolder, $this->supportFolder, $this->project);
 	}
 
 	public function initialize(){
+		$module = $this->getModuleDetails();
+		$this->addCurrentModuleToComposer($module);
 		$this->moveModuleIntoSubfolder();
 		$this->moveProjectIntoRoot();
         $this->run_cmd('cp ' . $this->moduleFolder . '/composer.json .');
-        $this->moveToRoot('_ss_environment.php');
+        $this->moveToRoot('.env');
+        $this->moveToRoot('index.php');
 		$this->moveToRoot('phpunit.xml');
 		$this->replaceInFile('{{MODULE_DIR}}', $this->moduleFolder, './phpunit.xml');
 		$this->run_cmd('rm -rf ' . $this->supportFolder);
+		$this->run_cmd('rm -rf ' . $this->moduleFolder);
+
 //		$this->addDepenanciesToComposer();
 	}
 
+	private function addCurrentModuleToComposer($module)
+	{
+		$composer = new ComposerJSON('./composer.json');
+		$composer->mergeInto('require', [
+			$module['name']	=> $module['version']
+		]);
+		$composer->mergeInto('repositories', [
+			$module['name']	=> [
+				'type'		=> 'git',
+				'url'		=> $module['vcs'],
+				'private'	=> 'true'
+			]
+		]);
+		$composer->save();
+	}
+
+	/*
 	private function addDepenanciesToComposer() {
 		$testProjectJson = new ComposerJSON('./composer.json');
 		$moduleJson = new ComposerJSON('./module-under-test/composer.json');
 		$testProjectJson->mergeInto('repositories', $moduleJson->getValue('repositories'));
 		$testProjectJson->mergeInto('require', $moduleJson->getValue('require'));
 		$testProjectJson->save();
+	}
+	*/
+
+	public function getModuleDetails()
+	{
+		$composer = new ComposerJSON('./composer.json');
+		return [
+			'version'	=> $this->getModuleVersion(),
+			'vcs'		=> $this->run_cmd('git config --get remote.origin.url'),
+			'name'		=> $composer->getValue('name'),
+			'type'		=> $composer->getValue('type')
+		];
+	}
+
+	public function getModuleVersion()
+	{
+		$branch = $this->run_cmd('git branch | grep \* | cut -d \' \' -f2');
+		return $branch;
 	}
 
 	private function moveProjectIntoRoot() {
@@ -127,8 +167,12 @@ class SilverStripeGitlabCiSupport {
 
 	private function run_cmd($cmd) {
 		if (!$this->dryrun) {
+			ob_start();
 			passthru($cmd, $returnVar);
+			$result = ob_get_contents();
+			ob_end_clean();
 			if($returnVar > 0) die($returnVar);
+			return trim($result);
 		}
 
 		$this->writeln( "+ $cmd" );
