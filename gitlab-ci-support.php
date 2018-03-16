@@ -74,9 +74,6 @@ class SilverStripeGitlabCiSupport {
 
 	public function initialize(){
 		$module = $this->getModuleDetails();
-
-		print_r($module) . "\n\n";
-
 		$this->addCurrentModuleToComposer($module);
 		$this->moveModuleIntoSubfolder();
 		$this->moveProjectIntoRoot();
@@ -87,8 +84,6 @@ class SilverStripeGitlabCiSupport {
 		$this->replaceInFile('{{MODULE_DIR}}', $this->getFinalModuleDir($module), './phpunit.xml');
 		$this->run_cmd('rm -rf ' . $this->supportFolder);
 		$this->run_cmd('rm -rf ' . $this->moduleFolder);
-
-//		$this->addDepenanciesToComposer();
 	}
 
 	public function getFinalModuleDir($module)
@@ -117,15 +112,6 @@ class SilverStripeGitlabCiSupport {
 		$composer->save();
 	}
 
-	/*
-	private function addDepenanciesToComposer() {
-		$testProjectJson = new ComposerJSON('./composer.json');
-		$moduleJson = new ComposerJSON('./module-under-test/composer.json');
-		$testProjectJson->mergeInto('repositories', $moduleJson->getValue('repositories'));
-		$testProjectJson->mergeInto('require', $moduleJson->getValue('require'));
-		$testProjectJson->save();
-	}
-	*/
 
 	public function getModuleDetails()
 	{
