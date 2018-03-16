@@ -114,6 +114,7 @@ class SilverStripeGitlabCiSupport {
 		$composer = new ComposerJSON('./composer.json');
 		return [
 			'version'	=> $this->getModuleVersion(),
+			'detached'	=> $this->run_cmd('git show -s --pretty=%d HEAD'),
 			'vcs'		=> $this->run_cmd('git config --get remote.origin.url'),
 			'name'		=> $composer->getValue('name'),
 			'type'		=> $composer->getValue('type'),
