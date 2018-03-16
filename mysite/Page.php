@@ -1,15 +1,12 @@
 <?php
 
-/**
- * Created by PhpStorm.
- * User: shawn
- * Date: 10/05/17
- * Time: 16:25
- */
+use SilverStripe\CMS\Model\SiteTree;
+use SilverStripe\CMS\Controllers\ContentController;
+
 class Page extends SiteTree {
 
 }
 
-class Page_Controller extends ContentController {
+class PageController extends ContentController {
 
 }
