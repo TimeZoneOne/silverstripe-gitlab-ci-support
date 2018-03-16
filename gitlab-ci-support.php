@@ -68,11 +68,16 @@ class SilverStripeGitlabCiSupport {
         $this->moveToRoot('.env');
         $this->moveToRoot('index.php');
 		$this->moveToRoot('phpunit.xml');
-		$this->replaceInFile('{{MODULE_DIR}}', $this->moduleFolder, './phpunit.xml');
+		$this->replaceInFile('{{MODULE_DIR}}', $this->getFinalModuleDir($module), './phpunit.xml');
 		$this->run_cmd('rm -rf ' . $this->supportFolder);
 		$this->run_cmd('rm -rf ' . $this->moduleFolder);
 
 //		$this->addDepenanciesToComposer();
+	}
+
+	public function getFinalModuleDir($module)
+	{
+		return 'vendor/' . $module['name'];
 	}
 
 	private function addCurrentModuleToComposer($module)
@@ -108,7 +113,7 @@ class SilverStripeGitlabCiSupport {
 			'version'	=> $this->getModuleVersion(),
 			'vcs'		=> $this->run_cmd('git config --get remote.origin.url'),
 			'name'		=> $composer->getValue('name'),
-			'type'		=> $composer->getValue('type')
+			'type'		=> $composer->getValue('type'),
 		];
 	}
 

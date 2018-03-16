@@ -5,7 +5,7 @@
     </php>
 
     <testsuite name="Default">
-        <directory>{{MODULE_DIR}}/tests</directory>
+        <directory>{{MODULE_DIR}}/tests/php</directory>
     </testsuite>
 
 </phpunit>
