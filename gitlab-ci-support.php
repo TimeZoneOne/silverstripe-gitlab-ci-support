@@ -31,6 +31,19 @@ class ComposerJSON {
 		return array_key_exists($key, $this->config) ? $this->config[$key] : NULL;
 	}
 
+	public function setValue($key, $value) {
+		if(array_key_exists($key, $this->config)) {
+			$this->config[$key] = $value;
+		}
+	}
+
+	public function removeValue($key)
+	{
+		if(array_key_exists($key, $this->config)) {
+			unset($this->config[$key]);
+		};
+	}
+
 	public function mergeInto($key, $value) {
 		$mergedValue = $this->getValue($key) ?: array();
 		if ($value) $mergedValue += $value;
@@ -86,6 +99,11 @@ class SilverStripeGitlabCiSupport {
 	private function addCurrentModuleToComposer($module)
 	{
 		$composer = new ComposerJSON('./composer.json');
+
+		$composer->setValue('name', 'test/project');
+		$composer->removeValue('extra');
+		$composer->removeValue('type');
+
 		$composer->mergeInto('require', [
 			$module['name']	=> 'dev-' . $module['version']
 		]);
