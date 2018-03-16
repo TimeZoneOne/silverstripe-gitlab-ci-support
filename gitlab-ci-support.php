@@ -24,7 +24,7 @@ class ComposerJSON {
 	}
 
 	public function save($path = NULL) {
-		save_json($path?:$this->filename, $this->config);
+		file_put_contents($path?:$this->filename, json_encode($this->config, JSON_UNESCAPED_SLASHES));
 	}
 
 	public function getValue($key) {
