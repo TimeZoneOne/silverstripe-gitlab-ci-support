@@ -112,10 +112,17 @@ class SilverStripeGitlabCiSupport {
 	public function getModuleDetails()
 	{
 		$composer = new ComposerJSON('./composer.json');
+		$vcs = $this->run_cmd('git config --get remote.origin.url');
+
+		if(strpos($vcs, '@') !== false) {
+			$vcs = substr($vcs, strpos($vcs, '@') + 1);
+			$vcs = 'git@' . preg_replace('/\//', ':', $vcs, 1);
+		}
+
 		return [
 			'version'	=> $this->getModuleVersion(),
 			'detached'	=> $this->run_cmd('git show -s --pretty=%d HEAD'),
-			'vcs'		=> $this->run_cmd('git config --get remote.origin.url'),
+			'vcs'		=> $vcs,
 			'name'		=> $composer->getValue('name'),
 			'type'		=> $composer->getValue('type'),
 		];
@@ -124,6 +131,10 @@ class SilverStripeGitlabCiSupport {
 	public function getModuleVersion()
 	{
 		$branch = $this->run_cmd('git branch | grep \* | cut -d \' \' -f2');
+		if(strpos($branch, '(detached') !== false) {
+			$branch = $this->run_cmd('git show -s --pretty=%d HEAD');
+			$branch = str_replace('(HEAD, origin/', '', str_replace(')', '', $branch));
+		}
 		return $branch;
 	}
 
