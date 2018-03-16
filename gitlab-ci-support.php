@@ -87,7 +87,7 @@ class SilverStripeGitlabCiSupport {
 	{
 		$composer = new ComposerJSON('./composer.json');
 		$composer->mergeInto('require', [
-			$module['name']	=> $module['version']
+			$module['name']	=> 'dev-' . $module['version']
 		]);
 		$composer->mergeInto('repositories', [
 			$module['name']	=> [
