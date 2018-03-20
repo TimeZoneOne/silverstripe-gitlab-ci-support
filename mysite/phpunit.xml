@@ -1,11 +1,11 @@
-<phpunit bootstrap="framework/tests/bootstrap.php" colors="true">
+<phpunit bootstrap="vendor/silverstripe/framework/tests/bootstrap.php" colors="true">
 
     <php>
         <get name="flush" value="1"/>
     </php>
 
     <testsuite name="Default">
-        <directory>{{MODULE_DIR}}/tests</directory>
+        <directory>{{MODULE_DIR}}/tests/php</directory>
     </testsuite>
 
 </phpunit>

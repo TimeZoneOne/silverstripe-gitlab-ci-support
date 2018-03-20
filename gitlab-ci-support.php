@@ -24,11 +24,24 @@ class ComposerJSON {
 	}
 
 	public function save($path = NULL) {
-		save_json($path?:$this->filename, $this->config);
+		file_put_contents($path?:$this->filename, json_encode($this->config, JSON_UNESCAPED_SLASHES));
 	}
 
 	public function getValue($key) {
 		return array_key_exists($key, $this->config) ? $this->config[$key] : NULL;
+	}
+
+	public function setValue($key, $value) {
+		if(array_key_exists($key, $this->config)) {
+			$this->config[$key] = $value;
+		}
+	}
+
+	public function removeValue($key)
+	{
+		if(array_key_exists($key, $this->config)) {
+			unset($this->config[$key]);
+		};
 	}
 
 	public function mergeInto($key, $value) {
@@ -60,22 +73,73 @@ class SilverStripeGitlabCiSupport {
 	}
 
 	public function initialize(){
+		$module = $this->getModuleDetails();
+		$this->addCurrentModuleToComposer($module);
 		$this->moveModuleIntoSubfolder();
 		$this->moveProjectIntoRoot();
         $this->run_cmd('cp ' . $this->moduleFolder . '/composer.json .');
-        $this->moveToRoot('_ss_environment.php');
+        $this->moveToRoot('.env');
+        $this->moveToRoot('index.php');
 		$this->moveToRoot('phpunit.xml');
-		$this->replaceInFile('{{MODULE_DIR}}', $this->moduleFolder, './phpunit.xml');
+		$this->replaceInFile('{{MODULE_DIR}}', $this->getFinalModuleDir($module), './phpunit.xml');
 		$this->run_cmd('rm -rf ' . $this->supportFolder);
-//		$this->addDepenanciesToComposer();
+		$this->run_cmd('rm -rf ' . $this->moduleFolder);
 	}
 
-	private function addDepenanciesToComposer() {
-		$testProjectJson = new ComposerJSON('./composer.json');
-		$moduleJson = new ComposerJSON('./module-under-test/composer.json');
-		$testProjectJson->mergeInto('repositories', $moduleJson->getValue('repositories'));
-		$testProjectJson->mergeInto('require', $moduleJson->getValue('require'));
-		$testProjectJson->save();
+	public function getFinalModuleDir($module)
+	{
+		return 'vendor/' . $module['name'];
+	}
+
+	private function addCurrentModuleToComposer($module)
+	{
+		$composer = new ComposerJSON('./composer.json');
+
+		$composer->setValue('name', 'test/project');
+		$composer->removeValue('extra');
+		$composer->removeValue('type');
+
+		$composer->mergeInto('require', [
+			$module['name']	=> 'dev-' . $module['version']
+		]);
+		$composer->mergeInto('repositories', [
+			$module['name']	=> [
+				'type'		=> 'git',
+				'url'		=> $module['vcs'],
+				'private'	=> 'true'
+			]
+		]);
+		$composer->save();
+	}
+
+
+	public function getModuleDetails()
+	{
+		$composer = new ComposerJSON('./composer.json');
+		$vcs = $this->run_cmd('git config --get remote.origin.url');
+
+		if(strpos($vcs, '@') !== false) {
+			$vcs = substr($vcs, strpos($vcs, '@') + 1);
+			$vcs = 'git@' . preg_replace('/\//', ':', $vcs, 1);
+		}
+
+		return [
+			'version'	=> $this->getModuleVersion(),
+			'detached'	=> $this->run_cmd('git show -s --pretty=%d HEAD'),
+			'vcs'		=> $vcs,
+			'name'		=> $composer->getValue('name'),
+			'type'		=> $composer->getValue('type'),
+		];
+	}
+
+	public function getModuleVersion()
+	{
+		$branch = $this->run_cmd('git branch | grep \* | cut -d \' \' -f2');
+		if(strpos($branch, '(detached') !== false) {
+			$branch = $this->run_cmd('git show -s --pretty=%d HEAD');
+			$branch = str_replace('(HEAD, origin/', '', str_replace(')', '', $branch));
+		}
+		return $branch;
 	}
 
 	private function moveProjectIntoRoot() {
@@ -127,8 +191,12 @@ class SilverStripeGitlabCiSupport {
 
 	private function run_cmd($cmd) {
 		if (!$this->dryrun) {
+			ob_start();
 			passthru($cmd, $returnVar);
+			$result = ob_get_contents();
+			ob_end_clean();
 			if($returnVar > 0) die($returnVar);
+			return trim($result);
 		}
 
 		$this->writeln( "+ $cmd" );
