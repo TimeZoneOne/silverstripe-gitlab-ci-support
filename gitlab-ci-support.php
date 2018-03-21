@@ -118,6 +118,8 @@ class SilverStripeGitlabCiSupport {
 		$composer = new ComposerJSON('./composer.json');
 		$vcs = $this->run_cmd('git config --get remote.origin.url');
 
+		$this->writeln('Module\'s repo : ' . $vcs);
+
 		if(strpos($vcs, '@') !== false) {
 			$vcs = substr($vcs, strpos($vcs, '@') + 1);
 			$vcs = 'git@' . preg_replace('/\//', ':', $vcs, 1);
