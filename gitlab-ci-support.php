@@ -122,7 +122,10 @@ class SilverStripeGitlabCiSupport {
 
 		if(strpos($vcs, '@') !== false) {
 			$vcs = substr($vcs, strpos($vcs, '@') + 1);
-			$vcs = 'git@' . preg_replace('/\//', ':', $vcs, 1);
+			if(strpos($vcs, ':') === false) {
+				$vcs = preg_replace('/\//', ':', $vcs, 1);
+			}
+			$vcs = 'git@' . $vcs;
 		}
 
 		return [
