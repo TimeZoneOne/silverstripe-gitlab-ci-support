@@ -144,14 +144,32 @@ class SilverStripeGitlabCiSupport {
 
 	public function getModuleVersion()
 	{
+
+		$branches = $this->run_cmd("git branch | grep '\*'");
+		$this->writeln("Branches Details: {$branches}\n\n====\n\n");
+
+
+//		exec("git branch | grep '\*'", $shellOutput);
+//		foreach ($shellOutput as $line) {
+//			if (strpos($line, '* ') !== false) {
+//				return trim(strtolower(str_replace('* ', '', $line)));
+//			}
+//		}
+
+
 		$branch = $this->run_cmd('git branch | grep \* | cut -d \' \' -f2');
 		$this->writeln("Branch Details: {$branch}");
 		if(strpos($branch, '(detached') !== false) {
 			$branch = $this->run_cmd('git show -s --pretty=%d HEAD');
 			$this->writeln("Branch Details: {$branch}\n\n");
+
+
+
+
 			$branch = str_replace('(HEAD, origin/', '', str_replace(')', '', $branch));
 		}
 		return $branch;
+		/* */
 	}
 
 	private function moveProjectIntoRoot() {
