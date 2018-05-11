@@ -93,6 +93,11 @@ class SilverStripeGitlabCiSupport {
 
 	private function addCurrentModuleToComposer($module)
 	{
+		$this->writeln("Adding module on to composer");
+		foreach ($module as $name => $value) {
+			$this->writeln("{$name}: {$value}");
+		}
+
 		$composer = new ComposerJSON('./composer.json');
 
 		$composer->setValue('name', 'test/project');
