@@ -159,7 +159,7 @@ class SilverStripeGitlabCiSupport {
 			else if(isset($parts[0])) {
 				$branch = trim($parts[0]);
 			}
-
+			$branch = str_replace('origin/', '', $branch);
 			// $branch = str_replace('(HEAD, origin/', '', str_replace(')', '', $branch));
 		}
 		return $branch;
