@@ -145,6 +145,7 @@ class SilverStripeGitlabCiSupport {
 	public function getModuleVersion()
 	{
 		$branch = $this->run_cmd('git branch | grep \* | cut -d \' \' -f2');
+		$this->writeln("Branch Details: {$branch}");
 		if(strpos($branch, '(detached') !== false) {
 			$branch = $this->run_cmd('git show -s --pretty=%d HEAD');
 			$branch = str_replace('(HEAD, origin/', '', str_replace(')', '', $branch));
