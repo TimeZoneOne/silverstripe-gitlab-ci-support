@@ -148,6 +148,7 @@ class SilverStripeGitlabCiSupport {
 		$this->writeln("Branch Details: {$branch}");
 		if(strpos($branch, '(detached') !== false) {
 			$branch = $this->run_cmd('git show -s --pretty=%d HEAD');
+			$this->writeln("Branch Details: {$branch}\n\n");
 			$branch = str_replace('(HEAD, origin/', '', str_replace(')', '', $branch));
 		}
 		return $branch;
