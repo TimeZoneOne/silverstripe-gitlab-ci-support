@@ -93,6 +93,11 @@ class SilverStripeGitlabCiSupport {
 
 	private function addCurrentModuleToComposer($module)
 	{
+		$this->writeln("Adding module on to composer");
+		foreach ($module as $name => $value) {
+			$this->writeln("{$name}: {$value}");
+		}
+
 		$composer = new ComposerJSON('./composer.json');
 
 		$composer->setValue('name', 'test/project');
@@ -139,10 +144,23 @@ class SilverStripeGitlabCiSupport {
 
 	public function getModuleVersion()
 	{
+
 		$branch = $this->run_cmd('git branch | grep \* | cut -d \' \' -f2');
 		if(strpos($branch, '(detached') !== false) {
 			$branch = $this->run_cmd('git show -s --pretty=%d HEAD');
-			$branch = str_replace('(HEAD, origin/', '', str_replace(')', '', $branch));
+			$this->writeln("Branch Details: {$branch}\n\n");
+
+			$branch = str_replace('(', '', str_replace(')', '', $branch));
+			$parts = explode(',', $branch);
+
+			if(isset($parts[1])) {
+				$branch = trim($parts[1]);
+			}
+			else if(isset($parts[0])) {
+				$branch = trim($parts[0]);
+			}
+			$branch = str_replace('origin/', '', $branch);
+			// $branch = str_replace('(HEAD, origin/', '', str_replace(')', '', $branch));
 		}
 		return $branch;
 	}
